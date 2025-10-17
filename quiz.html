@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grammar Quiz</title>
+    <style>
+        /* --- QUIZ CSS (CLEANED) --- */
+        
+        /* The body style ensures the quiz fills the screen in the iframe */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff; /* Use white background for the page */
+        }
+
+        .quiz-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 25px;
+            background-color: #F5F8FF; /* Light Pale Blue Background */
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            font-family: Arial, sans-serif;
+            border: 1px solid #C0D6DF;
+        }
+
+        h2 {
+            color: #3d5a80;
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            border-bottom: 3px solid #58B3CC;
+            padding-bottom: 10px;
+        }
+
+        .question-block {
+            margin-bottom: 25px;
+            padding: 20px;
+            border: 1px solid #EAEAEA;
+            border-radius: 10px;
+            background-color: #ffffff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .question-block h4 {
+            font-size: 1.15em;
+            color: #293241;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .option-button {
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            border: 1px solid #DCC7AA;
+            border-radius: 8px;
+            background-color: #FFF8DC;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            font-size: 1em;
+            color: #555;
+            outline: none;
+        }
+
+        .option-button:hover:not([disabled]) {
+            background-color: #E0F8FF;
+            border-color: #58B3CC;
+        }
+
+        .option-text-content {
+            flex-grow: 1; 
+            padding-right: 10px; 
+        }
+
+        /* Feedback Styles */
+        .correct {
+            background-color: #D6EADF !important;
+            border-color: #38A854 !important;
+            color: #155724 !important;
+            font-weight: bold;
+        }
+
+        .incorrect {
+            background-color: #F8D7DA !important;
+            border-color: #C07079 !important;
+            color: #721c24 !important;
+        }
+
+        /* Icon Styles */
+        .feedback-icon {
+            font-size: 1.2em;
+            font-weight: bold;
+            line-height: 1; 
+            margin-left: auto; 
+        }
+
+        /* Explanation Box */
+        .explanation {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 6px;
+            background-color: #F8EFE4;
+            color: #856404;
+            font-size: 0.9em;
+            border-left: 4px solid #F7C331;
+            display: none; 
+        }
+
+        .explanation strong {
+            color: #000; 
+        }
+
+        /* Submit Button Style */
+        #submit-quiz-btn {
+            display: block;
+            width: 100%;
+            padding: 15px 20px;
+            margin-top: 30px;
+            background-color: #58B3CC;
+            color: white;
+            font-size: 1.2em;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #submit-quiz-btn:hover {
+            background-color: #3d5a80;
+        }
+
+        /* Score Card */
+        #final-result {
+            text-align: center;
+            padding: 30px;
+            margin-top: 30px;
+            border: 2px dashed #58B3CC;
+            border-radius: 12px;
+            background-color: #E0F8FF;
+        }
+
+        #score-display {
+            font-size: 2.5em;
+            color: #3d5a80;
+            font-weight: 900;
+            display: block;
+            margin: 10px 0;
+        }
+
+        .completion-message {
+            color: #293241;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        /* --- TOAST NOTIFICATION STYLES --- */
+        #feedback-toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            color: white;
+            font-weight: bold;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s, background-color 0.3s;
+            font-size: 1.1em;
+        }
+
+        .toast-correct {
+            background-color: #38A854;
+        }
+
+        .toast-incorrect {
+            background-color: #C07079;
+        }
+
+        /* --- FIXED TIMER DISPLAY (Works perfectly inside the iFrame) --- */
+        #timer-display {
+            position: fixed; /* Stays fixed relative to the iFrame window */
+            top: 15px;      
+            right: 20px;    
+            background-color: #F5F8FF; 
+            padding: 10px 15px;
+            border: 2px solid #58B3CC;
+            border-radius: 8px;
+            z-index: 1000; 
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            font-size: 1.5em; 
+            font-weight: bold;
+            color: #3d5a80;
+        }
+
+        /* --- RETRY BUTTON STYLES (RED COLOR) --- */
+        #retry-quiz-btn {
+            background-color: #DC3545 !important; 
+            border: 1px solid #C07079;
+        }
+        #retry-quiz-btn:hover {
+            background-color: #B02A37 !important;
+        }
+    </style>
+</head>
+<body>
+
+<div id="feedback-toast"></div> 
+
+<div class="quiz-container">
+    <div class="separator" style="clear: both; text-align: center;"><a href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgJiNyGhbbhEbZqPYMhqMYkTst81SWF4ouPPhnzBFRo9Se3-JQGsdb7PCf1rJXzyNgATK99iK5Rt_MSCSL7KLx_2Z-CopuNMVOCncSejpfp_fLqAmX0Sb_CHJIEvH5lIT3Rza5gZWmigTPtWJoReJZgnQQvtgtrSIROLMEN_0xrX1wY4GAkB_vCQog8Ec/s1024/Gemini_Generated_Image_pc63pqpc63pqpc63%20(4).png" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" data-original-height="1024" data-original-width="1024" height="320" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgJiNyGhbbhEbZqPYMhqMYkTst81SWF4ouPPhnzBFRo9Se3-JQGsdb7PCf1rJXzyNgATK99iK5Rt_MSCSL7KLx_2Z-CopuNMVOCncSejpfp_fLqAmX0Sb_CHJIEvH5lIT3Rza5gZWmigTPtWJoReJZgnQQvtgtrSIROLMEN_0xrX1wY4GAkB_vCQog8Ec/s320/Gemini_Generated_Image_pc63pqpc63pqpc63%20(4).png" width="320" /></a></div><h2 style="text-align: center;">Grammar Quiz 5: (11 Questions)</h2>
+
+    <div id="timer-display">
+        Time Spent: <span id="time-left">00:00</span>
+    </div>
+
+    <div id="quiz-area">
+        </div>
+    
+    <div id="final-result" style="display: none;">
+        <h3 id="completion-title">Review Your Answers!</h3>
+        <p>Your Final Score is:</p>
+        <span id="score-display">0 / 11</span>
+        <p class="completion-message" id="review-message">Scroll up to review the correct answers and explanations for any mistakes.</p>
+        
+        <div id="score-feedback-message" style="margin-top: 20px; font-size: 1.1em; font-weight: 600;"></div>
+        <button id="retry-quiz-btn" style="display: none; margin-top: 15px; padding: 10px 20px; color: white; border: none; border-radius: 6px; cursor: pointer; transition: background-color 0.3s;">
+            Try Again
+        </button>
+    </div>
+</div>
+
+<script>
+// --- JAVASCRIPT LOGIC (WITH ELAPSED TIMER) ---
+document.addEventListener('DOMContentLoaded', () => {
+
+    // 1. QUIZ DATA
+    const quizData = [
+        { q: "1. We were making kites when Father.............................................", options: ["arriving", "arrive", "arrived"], a: "arrived", exp: "The action that interrupts a continuous past action uses the Simple Past: 'arrived'." },
+        { q: "2. Don’t leave this place ............................................. I come back.", options: ["as long as", "when", "until"], a: "until", exp: "'Until' means 'up to the time that'." },
+        { q: "3. I ............................................. buy that mobile if I had money.", options: ["would have", "will", "would"], a: "would", exp: "This is a Second Conditional sentence: 'If + Simple Past (had), would + base verb (buy)'." },
+        { q: "4. She ................................ go to temple every day, when she lived in village.", options: ["will", "could", "would"], a: "would", exp: "'Would' is used to express a repeated habit in the past." },
+        { q: "5. He wanted to ............................................. an engineer", options: ["becomes", "becoming", "become"], a: "become", exp: "The infinitive form of the verb follows 'to': 'become'." },
+        { q: "6. My father is a ............................................. teacher.", options: ["retire", "retiring", "retired"], a: "retired", exp: "'Retired' is the Past Participle used as an adjective (a finished action) describing the teacher." },
+        { q: "7. He avoids ............................................. to strangers.", options: ["talk", "talked", "talking"], a: "talking", exp: "The verb 'avoids' is often followed by a Gerund (-ing) form." },
+        { q: "8. ............................................. goods will not be taken back.", options: ["sell", "selling", "Sold"], a: "Sold", exp: "'Sold' acts as a past participle adjective (goods that have been sold)." },
+        { q: "9. I heard some kids ............................................. for help.", options: ["shouted", "shouts", "shout"], a: "shout", exp: "Verbs of perception ('heard') can be followed by a base verb to indicate the complete action." },
+        { q: "10. Please spread ............................................. butter on bread.", options: ["a few", "few", "a little"], a: "a little", exp: "'A little' is used for small, uncountable quantities like butter." },
+        { q: "11. He has given ............................................. smoking.", options: ["away", "for", "up"], a: "up", exp: "'Given up' is a phrasal verb meaning to quit or stop." }
+    ];
+
+    let score = 0;
+    const quizArea = document.getElementById('quiz-area');
+    const finalResult = document.getElementById('final-result');
+    const scoreDisplay = document.getElementById('score-display');
+    const completionTitle = document.getElementById('completion-title');
+    const reviewMessage = document.getElementById('review-message');
+    const feedbackToast = document.getElementById('feedback-toast'); 
+    const scoreFeedbackMessage = document.getElementById('score-feedback-message');
+    const retryQuizBtn = document.getElementById('retry-quiz-btn');
+    const submitBtn = document.createElement('button');
+    submitBtn.setAttribute('id', 'submit-quiz-btn');
+    submitBtn.textContent = 'Check My Final Score & Finish';
+
+
+    // ELAPSED TIMER VARIABLES & LOGIC
+    let elapsedSeconds = 0;
+    const timeLeftDisplay = document.getElementById('time-left');
+    let timerInterval;
+
+    function formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        const paddedMinutes = minutes < 10 ? '0' + minutes : minutes;
+        const paddedSeconds = remainingSeconds < 10 ? '0' + remainingSeconds : remainingSeconds;
+        return `${paddedMinutes}:${paddedSeconds}`;
+    }
+
+    function startTimer() {
+        if (!timeLeftDisplay) return;
+        
+        timerInterval = setInterval(() => {
+            elapsedSeconds++;
+            timeLeftDisplay.textContent = formatTime(elapsedSeconds);
+        }, 1000);
+    }
+    // END ELAPSED TIMER LOGIC
+
+    // Function to show the temporary feedback toast
+    function showFeedbackToast(isCorrect) {
+        if (!feedbackToast) return; 
+        
+        feedbackToast.textContent = isCorrect ? 'Correct! 🎉' : 'Incorrect. Try the explanation below. 🙁';
+        feedbackToast.classList.remove('toast-correct', 'toast-incorrect');
+        feedbackToast.classList.add(isCorrect ? 'toast-correct' : 'toast-incorrect');
+        feedbackToast.style.opacity = '1';
+        setTimeout(() => {
+            feedbackToast.style.opacity = '0';
+        }, 2000);
+    }
+
+
+    // Function to generate the entire quiz structure
+    function buildQuiz() {
+        quizData.forEach((quiz) => {
+            const block = document.createElement('div');
+            block.classList.add('question-block');
+            
+            const title = document.createElement('h4');
+            title.textContent = quiz.q; 
+            block.appendChild(title);
+            
+            const optionsContainer = document.createElement('div');
+            optionsContainer.classList.add('options-container');
+
+            const explanation = document.createElement('div');
+            explanation.classList.add('explanation');
+            explanation.innerHTML = `**Correct Answer:** <strong>${quiz.a}</strong>. <br>${quiz.exp}`;
+            
+            const shuffledOptions = [...quiz.options].sort(() => Math.random() - 0.5); 
+            
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.classList.add('option-button');
+                
+                const optionTextSpan = document.createElement('span'); 
+                optionTextSpan.classList.add('option-text-content');
+                optionTextSpan.textContent = option;
+                
+                button.appendChild(optionTextSpan);
+
+                button.addEventListener('click', () => checkAnswer(button, option, quiz.a, block, explanation));
+                optionsContainer.appendChild(button);
+            });
+            
+            block.appendChild(optionsContainer);
+            block.appendChild(explanation);
+            quizArea.appendChild(block);
+        });
+
+        quizArea.after(submitBtn);
+    }
+
+    // Function to check the selected answer
+    function checkAnswer(selectedButton, selectedOption, correctAnswer, questionBlock, explanationElement) {
+        if (questionBlock.hasAttribute('data-answered')) return; 
+        
+        questionBlock.setAttribute('data-answered', 'true'); 
+
+        let isCorrect = (selectedOption === correctAnswer);
+
+        if (isCorrect) {
+            score++;
+        }
+        showFeedbackToast(isCorrect);
+        
+        Array.from(questionBlock.querySelectorAll('.option-button')).forEach(btn => {
+            btn.setAttribute('disabled', 'true');
+            
+            const feedbackIcon = document.createElement('span');
+            feedbackIcon.classList.add('feedback-icon');
+
+            const buttonText = btn.querySelector('.option-text-content').textContent;
+
+            if (buttonText === correctAnswer) { 
+                btn.classList.add('correct');
+                feedbackIcon.innerHTML = '&#x2705;'; 
+                btn.appendChild(feedbackIcon); 
+            } else if (btn === selectedButton) {
+                btn.classList.add('incorrect');
+                feedbackIcon.innerHTML = '&#x274C;'; 
+                btn.appendChild(feedbackIcon); 
+            }
+        });
+
+        explanationElement.style.display = 'block'; 
+        scoreDisplay.textContent = `${score} / ${quizData.length}`; 
+    }
+
+    // Function to handle submission (manually submitted)
+    function submitQuiz() {
+        clearInterval(timerInterval);
+        
+        finalResult.style.display = 'block';
+        
+        const answeredCount = document.querySelectorAll('[data-answered="true"]').length;
+        const totalQuestions = quizData.length;
+        const successRate = score / totalQuestions;
+        
+        
+        // --- SCORE-BASED FEEDBACK LOGIC ---
+        let feedbackHTML = '';
+        retryQuizBtn.style.display = 'none';
+
+        if (answeredCount === totalQuestions) {
+            completionTitle.textContent = "Quiz Complete! Fantastic Effort!";
+            reviewMessage.innerHTML = `You answered all questions! Time taken: <strong>${formatTime(elapsedSeconds)}</strong>. Scroll up to check your score details.`;
+            
+            if (score === totalQuestions) {
+                feedbackHTML = `<span style="color: #38A854;">Perfect Score! Well Done, you mastered the grammar concepts! ⭐</span>`;
+            } else if (successRate >= 0.7) { 
+                feedbackHTML = `<span style="color: #3d5a80;">Great Job! You scored high. Keep practicing! 👍</span>`;
+                retryQuizBtn.style.display = 'block';
+            } else {
+                feedbackHTML = `<span style="color: #C07079;">Good Attempt! Review the explanations for the ones you missed.</span>`;
+                retryQuizBtn.style.display = 'block';
+            }
+
+        } else {
+             completionTitle.textContent = "Review Time!";
+             reviewMessage.innerHTML = `You answered ${answeredCount} of ${totalQuestions} questions. Time taken: <strong>${formatTime(elapsedSeconds)}</strong>. Please scroll up and try to answer the remaining ones to get a final score!`;
+             
+             document.querySelectorAll('.question-block:not([data-answered])').forEach(block => {
+                 block.style.border = '2px solid orange';
+             });
+             
+             feedbackHTML = `<span style="color: orange;">You missed a few questions. Try again to boost your score!</span>`;
+             retryQuizBtn.style.display = 'block';
+        }
+        
+        scoreFeedbackMessage.innerHTML = feedbackHTML;
+        // --- END OF SCORE-BASED FEEDBACK LOGIC ---
+
+        finalResult.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Function to reset the quiz (Try Again button)
+    function resetQuiz() {
+        window.location.reload(); 
+    }
+
+    // Submit Button Logic calls the central submitQuiz function
+    submitBtn.addEventListener('click', submitQuiz);
+    
+    // Retry Button Logic
+    retryQuizBtn.addEventListener('click', resetQuiz);
+
+    // Run the quiz generator and start the timer
+    buildQuiz();
+    startTimer();
+});
+</script>
+</body>
+</html>
